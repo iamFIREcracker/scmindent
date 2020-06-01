@@ -167,16 +167,15 @@ have an LIN of 0.
 
 == Customization
 
-You can specify your own LINs for keywords via a customization
-file. The name of the file is the first available of the
-following:
+You can specify your own LINs for keywords via one customization
+files; `lispindent` will try and read these files, in this order:
 
-- the value of the environment variable `LISPWORDS`, if set
-- the file `.lispwords` in your home directory
+- the file `.lispwords` in the current directory
+- the value of the environment variable `LISPWORDS`, if set, or `.lispwords` in
+  your home directory
 
-If `LISPWORDS` isn't set and `~/.lispwords` doesn't exist, no
-customization is done. If `LISPWORDS` is set but the thus named
-file doesn't exist, no customization is done.
+If `lispindent` for whatever reason can't read any of these `.lispindent` files,
+then no customization is done.
 
 `~/.lispwords` can contain any number of
 2-element lists: The first element of each list is a Lisp symbol
