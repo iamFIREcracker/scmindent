@@ -14,6 +14,7 @@
 ;stdout
 
 (defvar *lisp-keywords* '())
+(defvar *labels-keywords* '(flet macrolet labels))
 
 (defun set-lisp-indent-number (sym num-of-subforms-to-be-indented-wide)
   (let* ((x (symbol-name sym))
@@ -67,6 +68,11 @@
                 -1))
           -1))))
 
+(defun in-labels-p (paren-stack)
+  (let* ((target (cadr paren-stack))
+         (surrounding-word (and target (lparen-word target))))
+    (member surrounding-word *labels-keywords* :test #'string-equal)))
+
 (defun literal-token-p (s)
   (let ((colon-pos (position #\: s)))
     (if colon-pos
@@ -77,24 +83,28 @@
 ;(trace get-lisp-indent-number literal-token-p read-from-string past-next-atom)
 
 (defstruct lparen
+  word
   spaces-before
   lisp-indent-num
   num-finished-subforms)
 
-(defun calc-subindent (s i n)
-  (let* ((j (past-next-atom s i n))
+(defun calc-subindent (s i n paren-stack)
+  (let* (w
+         (j (past-next-atom s i n))
          (lisp-indent-num 0)
          (delta-indent
            (if (= j i) 0
-             (let ((w (subseq s i j)))
+             (progn
+               (setq w (subseq s i j))
                (if (or (and (>= i 2) (member (char s (- i 2)) '(#\' #\`)))
                        (literal-token-p w)) 0
                  (progn (setq lisp-indent-num (get-lisp-indent-number w))
                         (case lisp-indent-num
                           ((-2) 0)
-                          ((-1) (if (< j n) (+ (- j i) 1) 1))
+                          ((-1) (if (in-labels-p paren-stack) 1
+                                  (if (< j n) (+ (- j i) 1) 1)))
                           (t 1))))))))
-    (values delta-indent lisp-indent-num j)))
+    (values delta-indent lisp-indent-num j w)))
 
 (defun num-leading-spaces (s)
   (let ((n (length s))
@@ -157,9 +167,10 @@
                        (incr-finished-subforms))
                       ((member c '(#\( #\[) :test #'char=)
                        (incr-finished-subforms)
-                       (multiple-value-bind (delta-indent lisp-indent-num j)
-                         (calc-subindent curr-line (1+ i) n)
-                         (push (make-lparen :spaces-before (+ 1 i curr-left-i delta-indent)
+                       (multiple-value-bind (delta-indent lisp-indent-num j w)
+                         (calc-subindent curr-line (1+ i) n paren-stack)
+                         (push (make-lparen :word w
+                                            :spaces-before (+ 1 i curr-left-i delta-indent)
                                             :lisp-indent-num lisp-indent-num
                                             :num-finished-subforms -1)
                                paren-stack)
