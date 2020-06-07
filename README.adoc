@@ -11,6 +11,8 @@ the only one I bother using), differs from the original one in the following:
   is not found there too, it will stop)
 - It _properly_ indents function definitions nested inside `FLET`, `MACROLET`,
   and `LABELS` (https://github.com/ds26gte/scmindent/issues/8[read more])
+- It does not leave trailing whitespaces when indenting empty lines
+  (https://github.com/ds26gte/scmindent/pull/9[read more])
 
 = Editing Lisp and Scheme files in vi
 
