@@ -40,9 +40,12 @@
         (dir ""))
     (loop
       (let ((file (concatenate 'string dir ".lispwords")))
-        (when (probe-file file)
+        (when (probe-file file) (return file))
+        (when (eql (truename dir) home-dir)
+          ; there is not much else we can do, so return
+          ; `file` anyway... the customization will stop
+          ; once it realizes the file is not there
           (return file)))
-      (when (eql (truename dir) home-dir) (return nil))
       (setf dir (concatenate 'string "../" dir)))))
 
 (defun read-lisp-words ()
