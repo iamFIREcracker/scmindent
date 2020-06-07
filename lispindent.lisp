@@ -35,8 +35,20 @@
   #+mkcl (mkcl:getenv s)
   #+sbcl (sb-ext:posix-getenv s))
 
-(defun read-lisp-words (path)
-  (with-open-file (i path :if-does-not-exist nil)
+(defun find-lispwords ()
+  (let ((home-dir (user-homedir-pathname))
+        (dir ""))
+    (loop
+      (let ((file (concatenate 'string dir ".lispwords")))
+        (when (probe-file file)
+          (return file)))
+      (when (eql (truename dir) home-dir) (return nil))
+      (setf dir (concatenate 'string "../" dir)))))
+
+(defun read-lisp-words ()
+  (with-open-file (i (or (retrieve-env "LISPWORDS")
+                         (find-lispwords))
+                     :if-does-not-exist nil)
     (when i
       (loop
         (let ((w (or (read i nil) (return))))
@@ -187,9 +199,7 @@
               (incf i))
             (incr-finished-subforms)))))))
 
-(read-lisp-words (merge-pathnames ".lispwords"))
-(read-lisp-words (or (retrieve-env "LISPWORDS")
-                     (merge-pathnames ".lispwords" (user-homedir-pathname))))
+(read-lisp-words)
 
 (indent-lines)
 

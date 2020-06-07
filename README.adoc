@@ -1,17 +1,16 @@
 // last modified 2019-11-13
 = About this fork
 
-This is my fork of https://github.com/ds26gte/scmindent[ds26gte/scmindent], that
-introduces:
+This is my fork of https://github.com/ds26gte/scmindent[ds26gte/scmindent];
+`lispindent` from this repository (the Common Lisp version at least, as that's
+the only one I bother using), differs from the original one in the following:
 
-- Loading `.lispwords` from the current directory before trying reading it
-  from your home directory or the location specified with the `LISPWORDS`
-  environment variable: this makes it possible for people to define project
-  specific settings (i.e. `./.lispwords`) overriding global ones (i.e.
-  `~/.lispwords`)
-- Proper indentation for forms nested inside FLET, MACROLET, and LABELS
-
-PS. Only the Common Lisp version of `lispindent` support these.
+- When the `LISPWORDS` env variable is not set, `lispindent` tries to load
+  `.lispwords` from the current directory, or from the parent, or from the
+  parent parent... until it reaches the user home directory (and if `.lispwords`
+  is not found there too, it will stop)
+- It _properly_ indents function definitions nested inside `FLET`, `MACROLET`,
+  and `LABELS` (https://github.com/ds26gte/scmindent/issues/8[read more])
 
 = Editing Lisp and Scheme files in vi
 
